@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:push_notifications_app/config/router/app_router.dart';
 import 'package:push_notifications_app/config/theme/app_theme.dart';
@@ -60,7 +59,7 @@ class _HandleNotificationInteractionsState extends State<HandleNotificationInter
     context.read<NotificationsBloc>().handleRemoteMessage(message);
 
     final messageId = message.messageId?.replaceAll(':', '').replaceAll('%', '');
-    context.push('/push-details/$messageId');
+    appRouter.push('/push-details/$messageId');
 
     // if (message.data['type'] == 'chat') {
     //   Navigator.pushNamed(context, '/chat', arguments: ChatArguments(message));

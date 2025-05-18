@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:push_notifications_app/config/local_notifications/local_notifications.dart';
 import 'package:push_notifications_app/domain/entities/push_message.dart';
 import 'package:push_notifications_app/firebase_options.dart';
 
@@ -11,6 +14,7 @@ part 'notifications_state.dart';
 
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  int pushNumberId = 0;
 
   NotificationsBloc() : super(NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
@@ -45,7 +49,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     if (state.status != AuthorizationStatus.authorized) return;
 
     final token = await messaging.getToken();
-    print('TOKEN: $token');
+    log("FCM TOKEN: $token");
   }
 
   void handleRemoteMessage(RemoteMessage message) {
@@ -60,7 +64,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       imageUrl: message.notification?.android?.imageUrl,
     );
 
-    print(notification);
+    LocalNotifications.showLocalNotification(
+      id: ++pushNumberId,
+      body: notification.body,
+      data: notification.data.toString(),
+      title: notification.title,
+    );
 
     add(NotificationReceived(notification));
   }
@@ -80,6 +89,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       sound: true,
     );
 
+    // Solicitar acceso para local notifications
+    await LocalNotifications.requestPermissionLocalNotifications();
+
     add(NotificationStatusChanged(settings.authorizationStatus));
   }
 
@@ -94,5 +106,4 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('Handling a background message: ${message.messageId}');
 }

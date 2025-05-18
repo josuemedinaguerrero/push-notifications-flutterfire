@@ -15,7 +15,20 @@ void main() async {
   await NotificationsBloc.initializeFirebaseNotifications();
   await LocalNotifications.initializeLocalNotifications();
 
-  runApp(MultiBlocProvider(providers: [BlocProvider(create: (context) => NotificationsBloc())], child: const MainApp()));
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create:
+              (context) => NotificationsBloc(
+                requestLocalNotificationPermissions: LocalNotifications.requestPermissionLocalNotifications,
+                showLocalNotification: LocalNotifications.showLocalNotification,
+              ),
+        ),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {

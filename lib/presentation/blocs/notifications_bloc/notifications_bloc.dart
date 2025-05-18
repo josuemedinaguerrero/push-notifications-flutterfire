@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:push_notifications_app/config/local_notifications/local_notifications.dart';
 import 'package:push_notifications_app/domain/entities/push_message.dart';
 import 'package:push_notifications_app/firebase_options.dart';
 
@@ -14,9 +13,12 @@ part 'notifications_state.dart';
 
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+  final Future<void> Function() requestLocalNotificationPermissions;
+  final void Function({required int id, String? title, String? body, String? data}) showLocalNotification;
   int pushNumberId = 0;
 
-  NotificationsBloc() : super(NotificationsState()) {
+  NotificationsBloc({required this.requestLocalNotificationPermissions, required this.showLocalNotification})
+    : super(NotificationsState()) {
     on<NotificationStatusChanged>(_notificationStatusChanged);
     on<NotificationReceived>(_onPushMessageReceived);
 
@@ -64,7 +66,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       imageUrl: message.notification?.android?.imageUrl,
     );
 
-    LocalNotifications.showLocalNotification(
+    showLocalNotification(
       id: ++pushNumberId,
       body: notification.body,
       data: notification.data.toString(),
@@ -90,7 +92,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     );
 
     // Solicitar acceso para local notifications
-    await LocalNotifications.requestPermissionLocalNotifications();
+    await requestLocalNotificationPermissions();
 
     add(NotificationStatusChanged(settings.authorizationStatus));
   }

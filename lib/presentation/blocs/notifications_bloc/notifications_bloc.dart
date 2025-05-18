@@ -66,12 +66,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       imageUrl: message.notification?.android?.imageUrl,
     );
 
-    showLocalNotification(
-      id: ++pushNumberId,
-      body: notification.body,
-      data: notification.data.toString(),
-      title: notification.title,
-    );
+    showLocalNotification(id: ++pushNumberId, body: notification.body, data: notification.messageId, title: notification.title);
 
     add(NotificationReceived(notification));
   }
